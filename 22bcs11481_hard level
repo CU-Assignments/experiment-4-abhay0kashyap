@@ -1,0 +1,56 @@
+import java.util.*;
+
+class TicketBookingSystem {
+    private static final int TOTAL_SEATS = 5;
+    private static final boolean[] seats = new boolean[TOTAL_SEATS];
+
+    public synchronized boolean bookTicket(int seatNo, String user) {
+        if (seatNo < 0 || seatNo >= TOTAL_SEATS) {
+            System.out.println(user + " tried to book an invalid seat!");
+            return false;
+        }
+        if (!seats[seatNo]) {
+            seats[seatNo] = true;
+            System.out.println(user + " successfully booked seat " + seatNo);
+            return true;
+        } else {
+            System.out.println(user + " tried to book an already booked seat " + seatNo);
+            return false;
+        }
+    }
+}
+
+class User extends Thread {
+    private TicketBookingSystem system;
+    private int seatNo;
+    private String name;
+
+    public User(TicketBookingSystem system, int seatNo, String name, int priority) {
+        this.system = system;
+        this.seatNo = seatNo;
+        this.name = name;
+        this.setPriority(priority);
+    }
+
+    public void run() {
+        system.bookTicket(seatNo, name);
+    }
+}
+
+public class TicketBooking {
+    public static void main(String[] args) {
+        TicketBookingSystem system = new TicketBookingSystem();
+
+        User user1 = new User(system, 2, "Regular User 1", Thread.NORM_PRIORITY);
+        User user2 = new User(system, 2, "VIP User 1", Thread.MAX_PRIORITY);
+        User user3 = new User(system, 3, "Regular User 2", Thread.NORM_PRIORITY);
+        User user4 = new User(system, 3, "VIP User 2", Thread.MAX_PRIORITY);
+        User user5 = new User(system, 1, "Regular User 3", Thread.MIN_PRIORITY);
+
+        user1.start();
+        user2.start();
+        user3.start();
+        user4.start();
+        user5.start();
+    }
+}
